@@ -15,7 +15,7 @@ import io
 
 st.set_page_config(
     page_title="BCforward Workforce Optimization",
-    page_icon="📊",
+    page_icon="bcforward_logo.png",
     layout="wide"
 )
 
@@ -417,6 +417,6 @@ st.markdown("</div>", unsafe_allow_html=True)
 
 st.markdown("""
 <div class='footer'>
-Prepared by DePaul University Capstone Team | Operational Analytics & Workforce Optimization | Confidential Draft
+Prepared by DePauw University Capstone Team | Operational Analytics & Workforce Optimization | Confidential Draft
 </div>
 """, unsafe_allow_html=True)
