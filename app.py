@@ -6,46 +6,72 @@ from datetime import datetime, timedelta
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import LabelEncoder
+from PIL import Image
 
-# ------------------------------------------------
-# PAGE CONFIG (Executive Layout)
-# ------------------------------------------------
+# --------------------------------------------------
+# PAGE CONFIG
+# --------------------------------------------------
+
 st.set_page_config(
-    page_title="Workforce Optimization Executive Dashboard",
+    page_title="BCforward Workforce Optimization",
     layout="wide"
 )
 
-# Corporate styling
+# --------------------------------------------------
+# BCforward CORPORATE THEME
+# --------------------------------------------------
+
 st.markdown("""
     <style>
-        .main {background-color: #f4f6f9;}
+        .main {
+            background-color: #f4f6f9;
+        }
         .metric-container {
             background-color: white;
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0px 2px 6px rgba(0,0,0,0.05);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0px 3px 8px rgba(0,0,0,0.06);
         }
-        h1 {color: #1f4e79;}
+        h1, h2, h3 {
+            color: #1f4e79;
+        }
+        .stMetric {
+            background-color: white;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0px 3px 8px rgba(0,0,0,0.05);
+        }
     </style>
 """, unsafe_allow_html=True)
 
-st.title("Workforce Delivery & Staffing Optimization")
-st.markdown("### Executive Performance & Revenue Acceleration Model")
+# --------------------------------------------------
+# HEADER WITH LOGO
+# --------------------------------------------------
 
-# ------------------------------------------------
+logo = Image.open("bcforward_logo.png")
+col_logo, col_title = st.columns([1,4])
+
+with col_logo:
+    st.image(logo, width=180)
+
+with col_title:
+    st.title("Workforce Delivery Optimization Dashboard")
+    st.markdown("### Executive Performance & Revenue Acceleration Model")
+
+st.markdown("---")
+
+# --------------------------------------------------
 # SYNTHETIC DATA GENERATION
-# ------------------------------------------------
+# --------------------------------------------------
 
 @st.cache_data
 def generate_data(n=1500):
     np.random.seed(42)
     industries = ['Technology', 'Healthcare', 'Finance', 'Retail', 'Manufacturing']
     job_types = ['Contract', 'Full-Time', 'Contract-to-Hire']
-    start_date = datetime(2024, 1, 1)
     data = []
 
-    for i in range(n):
-        req_date = start_date + timedelta(days=np.random.randint(0, 365))
+    for _ in range(n):
         industry = np.random.choice(industries)
         job_type = np.random.choice(job_types)
 
@@ -58,7 +84,6 @@ def generate_data(n=1500):
         rework = np.random.choice([0,1], p=[0.8,0.2])
         candidate_count = np.random.randint(5, 25)
 
-        # Revenue per placement (simulate realistic contract economics)
         revenue_per_day = np.random.randint(80, 150)
         contract_duration = np.random.randint(90, 180)
         revenue_value = revenue_per_day * contract_duration
@@ -72,25 +97,25 @@ def generate_data(n=1500):
         ])
 
     columns = [
-        "Industry","Job_Type",
-        "Time_to_Source","Time_to_Screen","Time_to_Submit",
-        "Time_to_Interview","Time_to_Offer","Time_to_Place",
-        "Candidate_Count","Rework_Flag",
-        "Total_Cycle_Time","Revenue_Value"
+        "Industry","Engagement Type",
+        "Time to Source","Time to Screen","Time to Submit",
+        "Time to Interview","Time to Offer","Time to Placement",
+        "Candidate Volume","Rework Indicator",
+        "Total Time to Placement","Estimated Contract Value"
     ]
 
     return pd.DataFrame(data, columns=columns)
 
 df = generate_data()
 
-# ------------------------------------------------
+# --------------------------------------------------
 # SIDEBAR CONTROLS
-# ------------------------------------------------
+# --------------------------------------------------
 
-st.sidebar.header("Scenario Controls")
+st.sidebar.header("Scenario Planning Controls")
 
 screen_reduction = st.sidebar.slider(
-    "Reduce Screening Time (%)",
+    "Screening Time Reduction (%)",
     0, 50, 0
 )
 
@@ -102,80 +127,80 @@ industry_filter = st.sidebar.multiselect(
 
 df = df[df["Industry"].isin(industry_filter)]
 
-# Apply scenario adjustment
-df["Adjusted_Screen_Time"] = df["Time_to_Screen"] * (1 - screen_reduction/100)
+df["Adjusted Screening Time"] = df["Time to Screen"] * (1 - screen_reduction/100)
 
-df["Adjusted_Total_Cycle"] = (
-    df["Time_to_Source"] +
-    df["Adjusted_Screen_Time"] +
-    df["Time_to_Submit"] +
-    df["Time_to_Interview"] +
-    df["Time_to_Offer"] +
-    df["Time_to_Place"]
+df["Adjusted Total Time"] = (
+    df["Time to Source"] +
+    df["Adjusted Screening Time"] +
+    df["Time to Submit"] +
+    df["Time to Interview"] +
+    df["Time to Offer"] +
+    df["Time to Placement"]
 )
 
-# ------------------------------------------------
+# --------------------------------------------------
 # FINANCIAL IMPACT MODEL
-# ------------------------------------------------
+# --------------------------------------------------
 
-avg_cycle = df["Total_Cycle_Time"].mean()
-adjusted_cycle = df["Adjusted_Total_Cycle"].mean()
+baseline_cycle = df["Total Time to Placement"].mean()
+adjusted_cycle = df["Adjusted Total Time"].mean()
+cycle_improvement = baseline_cycle - adjusted_cycle
 
-cycle_reduction = avg_cycle - adjusted_cycle
+placements = len(df)
 
-placements_per_year = len(df)
+avg_daily_revenue = df["Estimated Contract Value"].mean() / 120
 
-# Revenue acceleration logic:
-# Faster placement -> revenue realized earlier
-daily_revenue_avg = df["Revenue_Value"].mean() / 120
+projected_revenue_acceleration = cycle_improvement * avg_daily_revenue * placements
 
-revenue_acceleration = cycle_reduction * daily_revenue_avg * placements_per_year
+# --------------------------------------------------
+# EXECUTIVE KPI PANEL
+# --------------------------------------------------
 
-# ------------------------------------------------
-# KPI ROW
-# ------------------------------------------------
+st.subheader("Executive Performance Overview")
 
-st.subheader("Operational Performance Snapshot")
+k1, k2, k3, k4 = st.columns(4)
 
-col1, col2, col3, col4 = st.columns(4)
+k1.metric("Average Time to Placement (Baseline)",
+          f"{round(baseline_cycle,1)} Days")
 
-col1.metric("Avg Time-to-Placement",
-            f"{round(avg_cycle,1)} days")
+k2.metric("Projected Time to Placement (Adjusted)",
+          f"{round(adjusted_cycle,1)} Days")
 
-col2.metric("Adjusted Cycle Time",
-            f"{round(adjusted_cycle,1)} days")
+k3.metric("Cycle Time Improvement",
+          f"{round(cycle_improvement,2)} Days")
 
-col3.metric("Cycle Time Reduction",
-            f"{round(cycle_reduction,2)} days")
+k4.metric("Projected Annual Revenue Acceleration",
+          f"${round(projected_revenue_acceleration,0):,}")
 
-col4.metric("Projected Revenue Acceleration",
-            f"${round(revenue_acceleration,0):,}")
+st.markdown("---")
 
-# ------------------------------------------------
-# BOTTLENECK VISUAL
-# ------------------------------------------------
+# --------------------------------------------------
+# BOTTLENECK ANALYSIS
+# --------------------------------------------------
 
-st.subheader("Stage Bottleneck Analysis")
+st.subheader("Operational Bottleneck Analysis")
 
 stage_means = df[[
-    "Time_to_Source","Time_to_Screen",
-    "Time_to_Submit","Time_to_Interview",
-    "Time_to_Offer","Time_to_Place"
+    "Time to Source","Time to Screen",
+    "Time to Submit","Time to Interview",
+    "Time to Offer","Time to Placement"
 ]].mean().sort_values()
 
 fig_bottleneck = px.bar(
     stage_means,
     orientation='h',
-    title="Average Duration by Stage (Days)"
+    color=stage_means.values,
+    color_continuous_scale="Reds",
+    title="Average Duration by Staffing Stage (Days)"
 )
 
 st.plotly_chart(fig_bottleneck, use_container_width=True)
 
-# ------------------------------------------------
-# ML DELAY PREDICTION
-# ------------------------------------------------
+# --------------------------------------------------
+# PREDICTIVE MODELING
+# --------------------------------------------------
 
-st.subheader("Predictive Delay Modeling")
+st.subheader("Predictive Delay Modeling Insights")
 
 df_ml = df.copy()
 
@@ -183,17 +208,17 @@ le1 = LabelEncoder()
 le2 = LabelEncoder()
 
 df_ml["Industry"] = le1.fit_transform(df_ml["Industry"])
-df_ml["Job_Type"] = le2.fit_transform(df_ml["Job_Type"])
+df_ml["Engagement Type"] = le2.fit_transform(df_ml["Engagement Type"])
 
 features = [
-    "Industry","Job_Type",
-    "Time_to_Source","Time_to_Screen",
-    "Time_to_Submit","Time_to_Interview",
-    "Time_to_Offer","Candidate_Count","Rework_Flag"
+    "Industry","Engagement Type",
+    "Time to Source","Time to Screen",
+    "Time to Submit","Time to Interview",
+    "Time to Offer","Candidate Volume","Rework Indicator"
 ]
 
 X = df_ml[features]
-y = df_ml["Total_Cycle_Time"]
+y = df_ml["Total Time to Placement"]
 
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42
@@ -202,29 +227,33 @@ X_train, X_test, y_train, y_test = train_test_split(
 model = RandomForestRegressor(n_estimators=200, max_depth=10)
 model.fit(X_train, y_train)
 
-df_ml["Predicted_Cycle_Time"] = model.predict(X)
-
 importances = pd.Series(model.feature_importances_, index=features).sort_values()
 
 fig_importance = px.bar(
     importances,
     orientation='h',
-    title="Key Drivers of Placement Delays"
+    color=importances.values,
+    color_continuous_scale="Reds",
+    title="Primary Drivers of Placement Delays"
 )
 
 st.plotly_chart(fig_importance, use_container_width=True)
 
-# ------------------------------------------------
-# EXECUTIVE SUMMARY
-# ------------------------------------------------
+# --------------------------------------------------
+# EXECUTIVE SUMMARY PANEL
+# --------------------------------------------------
 
-st.subheader("Executive Impact Summary")
+st.markdown("---")
+st.subheader("Executive Summary")
 
 st.markdown(f"""
-- Reducing screening time by **{screen_reduction}%** decreases average cycle time by **{round(cycle_reduction,2)} days**
-- Annual revenue acceleration potential: **${round(revenue_acceleration,0):,}**
-- Most significant operational bottleneck: **{stage_means.idxmax()}**
-- Predictive modeling enables early identification of high-risk requisitions
+**Scenario Impact Assessment**
+
+• A {screen_reduction}% reduction in screening time results in a **{round(cycle_improvement,2)} day improvement** in overall placement cycle time.
+
+• This operational improvement translates to an estimated **${round(projected_revenue_acceleration,0):,} in accelerated revenue realization annually.**
+
+• Primary operational bottleneck identified: **{stage_means.idxmax()}**
+
+• Predictive modeling enables early identification of high-risk requisitions to proactively mitigate delays.
 """)
-
-
