@@ -24,22 +24,28 @@ st.set_page_config(
 st.markdown("""
     <style>
         .main {
-            background-color: #f4f6f9;
+            background-color: #0b1c2d;
         }
-        .metric-container {
-            background-color: white;
+
+        h1, h2, h3 {
+            color: white;
+        }
+
+        .stMetric {
+            background-color: #13293d;
             padding: 20px;
             border-radius: 12px;
-            box-shadow: 0px 3px 8px rgba(0,0,0,0.06);
+            border: 1px solid #1f4e79;
         }
-        h1, h2, h3 {
-            color: #1f4e79;
-        }
-        .stMetric {
-            background-color: white;
-            padding: 15px;
+
+        div[data-testid="metric-container"] {
+            background-color: #13293d;
             border-radius: 12px;
-            box-shadow: 0px 3px 8px rgba(0,0,0,0.05);
+            padding: 15px;
+        }
+
+        section[data-testid="stSidebar"] {
+            background-color: #0f2538;
         }
     </style>
 """, unsafe_allow_html=True)
@@ -49,14 +55,19 @@ st.markdown("""
 # --------------------------------------------------
 
 logo = Image.open("bcforward_logo.png")
-col_logo, col_title = st.columns([1,4])
+
+col_logo, col_title = st.columns([1.5,4])
 
 with col_logo:
-    st.image(logo, width=180)
+    st.image(logo, width=280)  # Increased size
 
 with col_title:
-    st.title("Workforce Delivery Optimization Dashboard")
-    st.markdown("### Executive Performance & Revenue Acceleration Model")
+    st.markdown("""
+        <h1 style='margin-bottom:0px;'>Workforce Delivery Optimization Dashboard</h1>
+        <h3 style='margin-top:5px; font-weight:400;'>
+        Executive Performance & Revenue Acceleration Model
+        </h3>
+    """, unsafe_allow_html=True)
 
 st.markdown("---")
 
